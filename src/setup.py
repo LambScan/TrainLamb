@@ -1,9 +1,6 @@
 import os
 import json
-parent_folder = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-
-__dataset_conf_file__ = os.path.join(parent_folder, "dataset", "dataset.json")
-__users_data__ = os.path.join(parent_folder, "dataset", "datausers.json")
+from FileManager import parent_folder, __dataset_conf_file__, __users_data__
 
 if __name__ == "__main__":
     # Initialice the dataset with all the files
@@ -25,7 +22,6 @@ if __name__ == "__main__":
     print(json.dumps(dataset, sort_keys=True, indent=4))
     with open(__dataset_conf_file__, "w") as f:
         f.write(json.dumps(dataset, sort_keys=True, indent=4))
-        # json.dump(dataset, f)
     #Initialice the users_data file
     with open(__users_data__, "w") as f:
-        json.dump({}, f)
+        f.write(json.dumps({}, sort_keys=True, indent=4))

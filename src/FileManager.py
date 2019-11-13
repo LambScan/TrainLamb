@@ -28,7 +28,7 @@ def next_image(dataset=None):
             image = (k, v)
             break
     with open(__dataset_conf_file__, "w") as f:
-        json.dump(dataset, f)
+        f.write(json.dumps(dataset, sort_keys=True, indent=4))
     return image
 
 
@@ -62,7 +62,7 @@ def update_current_photo_user(id_user, next_photo, last_photo_label=None, user_d
 
     # Save the current dataset of users-photos dictionary
     with open(__users_data__, "w") as f:
-        json.dump(user_data, f)
+        f.write(json.dumps(user_data, sort_keys=True, indent=4))
 
 
 def update_last_photo(id_user: str, last_photo_label=None, user_data=None):
@@ -82,7 +82,7 @@ def update_last_photo(id_user: str, last_photo_label=None, user_data=None):
 
     # Save the current dataset of users-photos dictionary
     with open(__users_data__, "w") as f:
-        json.dump(user_data, f)
+        f.write(json.dumps(user_data, sort_keys=True, indent=4))
 
 
 def update_image(changes, dataset=None):
@@ -101,7 +101,7 @@ def update_image(changes, dataset=None):
             raise Exception("Trying to change the label of a labeled image")
 
     with open(__dataset_conf_file__, "w") as f:
-        json.dump(dataset, f)
+        f.write(json.dumps(dataset, sort_keys=True, indent=4))
 
 
 if __name__ == "__main__":
