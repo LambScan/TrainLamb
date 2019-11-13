@@ -1,7 +1,7 @@
 import time
 import telepot
 from telepot.loop import MessageLoop
-from src.features import upload_info, start, stop, restart, ignore
+from features import upload_info, start, stop, restart, ignore
 
 __TOKEN__ = None
 
