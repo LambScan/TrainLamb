@@ -9,7 +9,7 @@ parent_folder = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(
 
 __dataset_conf_file__ = os.path.join(parent_folder, "dataset", "dataset.json")
 __users_data__ = os.path.join(parent_folder, "dataset", "datausers.json")
-
+_pending_ = "pending"
 
 def next_image(dataset=None):
     """
@@ -62,24 +62,27 @@ def update_current_photo_user(id_user, next_photo, last_photo_label=None, user_d
         f.write(json.dumps(user_data, sort_keys=True, indent=4))
 
 
-def update_last_photo(id_user: str, last_photo_label=None, user_data=None):
+def update_last_photo(id_user, last_photo_label=None, user_data=None):
     # Get the dataset of users-photos dictionary
+    id_user = str(id_user)
     if user_data is None:
         with open(__users_data__, "r") as f:
             user_data = json.load(f)
-    update_image((user_data[id_user][0], None))
 
-    # Remove the user from the users-photo dictionary
-    try:
-        user_data.pop(id_user, None)
-    except KeyError as e:
-        print("Error trying to delete the user ", id_user)
-        print(e)
-        print(type(e))
+    if id_user in user_data.keys():
+        update_image([(user_data[id_user][0], None)])
 
-    # Save the current dataset of users-photos dictionary
-    with open(__users_data__, "w") as f:
-        f.write(json.dumps(user_data, sort_keys=True, indent=4))
+        # Remove the user from the users-photo dictionary
+        try:
+            user_data.pop(id_user, None)
+        except KeyError as e:
+            print("Error trying to delete the user ", id_user)
+            print(e)
+            print(type(e))
+
+        # Save the current dataset of users-photos dictionary
+        with open(__users_data__, "w") as f:
+            f.write(json.dumps(user_data, sort_keys=True, indent=4))
 
 
 def update_image(changes, dataset=None):
