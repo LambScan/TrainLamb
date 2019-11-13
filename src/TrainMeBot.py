@@ -14,7 +14,7 @@ def __get_token__():
 
 options = {"One complete lamb": "lamb",
            "Empty": "empty",
-           "Wrong position\nMore than one lamb": "wrong",
+           "Not exactly one complete lamb": "wrong",
            "Error / Dirty / A fly": "fly"}
 
 

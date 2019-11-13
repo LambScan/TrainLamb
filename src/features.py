@@ -2,11 +2,12 @@ import os
 from datetime import datetime
 import cv2
 import numpy as np
+import time
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from FileManager import next_image, update_current_photo_user, update_last_photo, parent_folder, __dataset_conf_file__, __users_data__
 
 custom_keyboard = [["One complete lamb", "Empty"],
-                   ["Wrong position\nMore than one lamb", "Error / Dirty / A fly"],
+                   ["Not exactly one complete lamb", "Error / Dirty / A fly"],
                    ["I don't know", "Next one"]]
 reply_markup = ReplyKeyboardMarkup(keyboard=custom_keyboard)
 
@@ -43,7 +44,23 @@ def normal_execution(TelegramBot, user_id, last_photo_label=None):
 
 def start(TelegramBot, user_id):
     # TODO: Send info about the bot's and examples
-    
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="We're trying to sort out a dataset to train a neural network with a bunch of lamb's images.\nWe only discriminate 4 options:")
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="The options are:")
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="1. A pretty little lamb.\nThe image must contain the full animal, end to end; the head and the tail.")
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="...We may send you a few grown sheeps. If they are in the right position, it's ok also.")
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="2. An empty space.\nThere is no lamb or anything like a little lamb.")
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="3. Wrong position.\nThere is more than one lamb in the picture, or there is only the head of our lamb, or the butt... but there is not a full body of a lamb.")
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="4. ...a fly.\nYes.\nThere are a lot of flys in the farm; they use our cameras to everything they can possibly imagine. We're still working on it.\nIf you get an image which you can't interpretate or just partially interpretate, please, label it as a dirty image, an error, a fly.")
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="That's it. Let's see the lambs!")
+    time.sleep(6)
     normal_execution(TelegramBot, user_id)
 
 
