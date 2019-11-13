@@ -5,13 +5,10 @@ from datetime import datetime, date
 import cv2
 
 
-class FileManager(Exception):
-    pass
+parent_folder = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
-
-__dataset_conf_file__ = "../dataset/dataset.json"
-__users_data__ = "../dataset/datausers.json"
-_pending_ = "pending"
+__dataset_conf_file__ = os.path.join(parent_folder, "dataset", "dataset.json")
+__users_data__ = os.path.join(parent_folder, "dataset", "datausers.json")
 
 
 def next_image(dataset=None):
