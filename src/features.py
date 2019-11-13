@@ -13,18 +13,12 @@ reply_markup = ReplyKeyboardMarkup(keyboard=custom_keyboard)
 
 
 def get_image(color_path, depth_path):
-    # TODO: delete
-    if not depth_path:
-        depth_path = "/home/alberto/DataLamb/savings/color/error/2019-10-04/2019-10-04 11:35:10.818722_cam01_color.png"
-    if not color_path:
-        color_path = depth_path.replace("depth", "color")
-
     depth_path = str(os.path.dirname(os.getcwd()) + depth_path)
     color_path = str(os.path.dirname(os.getcwd()) + color_path)
 
     depth_image = cv2.imread(depth_path, cv2.IMREAD_ANYDEPTH)
     color_image = cv2.imread(color_path)
-    depth_image = cv2.applyColorMap(cv2.convertScaleAbs(depth_image), cv2.COLORMAP_JET)
+    depth_image = cv2.applyColorMap(cv2.convertScaleAbs(depth_image), cv2.COLORMAP_HOT)
     return np.hstack((color_image, depth_image))
 
 
