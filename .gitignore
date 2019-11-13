@@ -1,4 +1,13 @@
-
-.DS_Store
-
 etc/config
+
+*.png
+
+.vscode/
+
+*.DS_Store
+
+src/__pycache__/
+
+*.idea/
+
+*.pyc
