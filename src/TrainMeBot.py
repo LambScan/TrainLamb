@@ -12,10 +12,10 @@ def __get_token__():
     return str(__TOKEN__)
 
 
-options = {"Lamb": "lamb",
+options = {"One complete lamb": "lamb",
            "Empty": "empty",
-           "Error": "error",
-           "There's a fly\nor something": "fly"}
+           "Wrong position\nMore than one lamb": "wrong",
+           "Error / Dirty / A fly": "fly"}
 
 
 def on_chat_message(msg):

@@ -3,21 +3,20 @@ from datetime import datetime
 import cv2
 import numpy as np
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
-from FileManager import next_image, update_current_photo_user, update_last_photo
-from setup import parent_folder, __dataset_conf_file__, __users_data__
+from FileManager import next_image, update_current_photo_user, update_last_photo, parent_folder, __dataset_conf_file__, __users_data__
 
-custom_keyboard = [["Lamb", "Empty"],
-                   ["Error", "There's a fly\nor something"],
+custom_keyboard = [["One complete lamb", "Empty"],
+                   ["Wrong position\nMore than one lamb", "Error / Dirty / A fly"],
                    ["I don't know", "Next one"]]
 reply_markup = ReplyKeyboardMarkup(keyboard=custom_keyboard)
 
 
 def get_image(color_path, depth_path):
     depth_path = os.path.join(parent_folder, *depth_path.split("/"))
-    color_path = os.path.join(parent_folder, *color_path.split("/"))
+    # color_path = os.path.join(parent_folder, *color_path.split("/"))
 
     depth_image = cv2.imread(depth_path, cv2.IMREAD_ANYDEPTH)
-    color_image = cv2.imread(color_path)
+    # color_image = cv2.imread(color_path)
     depth_image = cv2.applyColorMap(255-np.ubyte(depth_image), cv2.COLORMAP_HOT)
     return depth_image
 
