@@ -43,6 +43,8 @@ def normal_execution(TelegramBot, user_id, last_photo_label=None):
 
 
 def start(TelegramBot, user_id):
+    # TODO: Send info about the bot's and examples
+    
     normal_execution(TelegramBot, user_id)
 
 
