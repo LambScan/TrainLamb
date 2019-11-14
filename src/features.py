@@ -1,18 +1,18 @@
 import os
-from datetime import datetime
 import cv2
-import numpy as np
 import time
-from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton
-from FileManager import next_image, update_current_photo_user, update_last_photo, parent_folder, __dataset_conf_file__, \
-    __users_data__
+from datetime import datetime
+import numpy as np
+from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from FileManager import next_image, update_current_photo_user, update_last_photo, parent_folder, manager
 
-custom_keyboard = [["\U0001F411 One complete lamb \U0001F411",
-                    "\U0001F342 Empty \U0001F342"],
-                   ["\U0001F984 Not exactly one complete lamb \U0001F984",
-                    "\U0001F99F Error / Dirty / A fly \U0001F99F"],
-                   ["\U0001F937 I don't know \U0001F937", "\U0001F195 Next one \U0001F195"]]
-reply_markup = ReplyKeyboardMarkup(keyboard=custom_keyboard)
+
+def get_custom_keyboard():
+    from TrainMeBot import options
+    _ = list(options.keys())
+    custom_keyboard = list(zip(_[::2], _[1::2]))
+    custom_keyboard.append(("\U0001F937 I don't know \U0001F937", "\U0001F195 Next one \U0001F195"))
+    return ReplyKeyboardMarkup(keyboard=custom_keyboard)
 
 
 def get_image(depth_path, color_path=None):
@@ -27,20 +27,27 @@ def get_image(depth_path, color_path=None):
 
 def normal_execution(TelegramBot, user_id, last_photo_label=None):
     # Query the next to-label image to show
-    image_dict = next_image()
-    # Make a new image by stacking the two images
-    image = get_image(depth_path=image_dict[1]["path_depth"], color_path=image_dict[1]["path_color"])
-    # Update the assigned photo to this user and save the last label
-    if last_photo_label is None:
-        update_current_photo_user(id_user=user_id, next_photo=image_dict)
-    else:
-        print("The user ", user_id, " is changing the label to: ", last_photo_label)
-        update_current_photo_user(id_user=user_id, next_photo=image_dict, last_photo_label=last_photo_label)
+    _ = next_image()
+    if _ is not None:
+        image_dict, working_dataset = _
+        # Make a new image by stacking the two images
+        image = get_image(depth_path=image_dict[1]["path_depth"], color_path=image_dict[1]["path_color"])
+        # Update the assigned photo to this user and save the last label
+        if last_photo_label is None:
+            update_current_photo_user(id_user=user_id, next_photo=image_dict, working_dataset=working_dataset)
+        else:
+            print("The user ", user_id, " is changing the label to: ", last_photo_label)
+            update_current_photo_user(id_user=user_id, next_photo=image_dict, last_photo_label=last_photo_label,
+                                      working_dataset=working_dataset)
 
-    # Send the next photo
-    TelegramBot.sendMessage(chat_id=user_id,
-                            text="What do you see in the following picture?")
-    send_photo(TelegramBot=TelegramBot, user_id=user_id, image=image)
+        # Send the next photo
+        TelegramBot.sendMessage(chat_id=user_id,
+                                text="What do you see in the following picture?")
+        send_photo(TelegramBot=TelegramBot, user_id=user_id, image=image)
+    else:
+        TelegramBot.sendMessage(chat_id=manager,
+                                text="Labelling task finished",
+                                reply_markup=ReplyKeyboardRemove())
 
 
 def send_photo(TelegramBot, user_id, path=None, image=None):
@@ -49,7 +56,7 @@ def send_photo(TelegramBot, user_id, path=None, image=None):
         cv2.imwrite(temp_path, image)
         TelegramBot.sendPhoto(chat_id=user_id,
                               photo=open(temp_path, "rb"),
-                              reply_markup=reply_markup)
+                              reply_markup=get_custom_keyboard())
         os.remove(temp_path)
     elif path is not None and image is None:
         TelegramBot.sendPhoto(chat_id=user_id,
@@ -79,28 +86,36 @@ def upload_info(TelegramBot, user_id, label):
 
 def ignore(TelegramBot, user_id):
     # Query the next to-label image to show
-    image_dict = next_image()
-    # Make a new image by stacking the two images
-    image = get_image(color_path=image_dict[1]["path_color"], depth_path=image_dict[1]["path_depth"])
+    _ = next_image()
+    if _ is not None:
+        image_dict, working_dataset = _
 
-    # The same thing that with the stop function but without sending the stop message
-    update_last_photo(id_user=user_id, last_photo_label=None)
+        # Make a new image by stacking the two images
+        image = get_image(color_path=image_dict[1]["path_color"], depth_path=image_dict[1]["path_depth"])
 
-    # Update the assigned photo to this user and save the last label
-    update_current_photo_user(id_user=user_id, next_photo=image_dict)
+        # The same thing that with the stop function but without sending the stop message
+        update_last_photo(id_user=user_id)
 
-    # Send the next photo
-    cv2.imwrite("temp.png", image)
-    current_msg = TelegramBot.sendPhoto(chat_id=user_id,
-                                        photo=open("temp.png", "rb"),
-                                        reply_markup=reply_markup)
-    os.remove("temp.png")
+        # Update the assigned photo to this user and save the last label
+        update_current_photo_user(id_user=user_id, next_photo=image_dict, working_dataset=working_dataset)
+
+        # Send the next photo
+        cv2.imwrite("temp.png", image)
+        TelegramBot.sendPhoto(chat_id=user_id,
+                              photo=open("temp.png", "rb"),
+                              reply_markup=get_custom_keyboard())
+        os.remove("temp.png")
+    else:
+        TelegramBot.sendMessage(chat_id=manager,
+                                text="Labelling task finished",
+                                reply_markup=ReplyKeyboardRemove())
 
 
 def start(TelegramBot, user_id):
     # There's a tutorial here and that's why all of this code...
     TelegramBot.sendMessage(chat_id=user_id,
-                            text="\U0001F411 \U0001F411 \U0001F411 \U0001F411 \U0001F411", reply_markup=ReplyKeyboardRemove())
+                            text="\U0001F411 \U0001F411 \U0001F411 \U0001F411 \U0001F411",
+                            reply_markup=ReplyKeyboardRemove())
     time.sleep(1)
     TelegramBot.sendMessage(chat_id=user_id,
                             text="We're trying to sort out a dataset to train a neural network \U0001F9E0 with a bunch of lamb's images.\U0001F411 \nWe only discriminate 4 options:")

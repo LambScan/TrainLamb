@@ -1,35 +1,33 @@
 import os
 import json
 import random
-
-# example dirty: "2019-11-05 07_30_18.182635_"
-# example fly: "2019-11-06 08_56_10.422600_"
-# example dirty with lamb: "2019-11-06 08_20_50.439476_"
-# example wrong: "2019-11-05 09_32_36.963856_" (2 lambs)
-# example wrong: "2019-11-05 09_32_30.893749_" (2 lambs)
-# example wrong: "2019-11-05 06_56_04.780405_" (just HEAD)
-# example wrong:
-# example wrong:
-# example grown sheep: "2019-11-05 09_31_04.304448_"
-# example grown sheep: "2019-11-05 09_44_39.307563_"
-# example little lamb: "2019-11-05 20_47_00.847771_"
-# example little lamb: "2019-11-05 09_39_13.913446_"
-# example little lamb: "2019-11-05 09_34_47.426885_"
-# example little lamb: "2019-11-05 09_39_02.802726_"
-# example little lamb: "2019-11-05 09_39_52.953345_"
-# example EMPTY: "2019-11-05 07_17_00.769557_"
-# example EMPTY: "2019-11-05 09_15_48.784271_"
-# example EMPTY: "2019-11-05 08_52_20.766967_"
-# example EMPTY: "2019-11-05 06_01_35.794028_"
-#
-#
-
-
+from enum import Enum
 
 parent_folder = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-__dataset_conf_file__ = os.path.join(parent_folder, "dataset", "dataset.json")
-__users_data__ = os.path.join(parent_folder, "dataset", "datausers.json")
+
+with open(os.path.join(parent_folder, "etc", "manager")) as f:
+    manager = int(f.readline().replace("\n", ""))
+
+
+class DATASET(Enum):
+    USERS = os.path.join(parent_folder, "dataset", "datausers.json")
+    ORIGINAL = os.path.join(parent_folder, "dataset", "dataset.json")
+    WORKING = os.path.join(parent_folder, "dataset", "dataset_working.json")
+    LABELED = os.path.join(parent_folder, "dataset", "dataset_labeled.json")
+
+
 _pending_ = "pending"
+
+
+def load_dataset(which_dataset):
+    with open(which_dataset.value) as f:
+        dataset = json.load(f)
+    return dataset
+
+
+def write_dataset(which_dataset, dataset):
+    with open(which_dataset.value, "w") as f:
+        f.write(json.dumps(dataset, sort_keys=True, indent=4))
 
 
 def next_image(dataset=None):
@@ -38,8 +36,7 @@ def next_image(dataset=None):
     It marks the image with a "pending" state label while it is being classified.
     """
     if dataset is None:
-        with open(__dataset_conf_file__, "r") as f:
-            dataset = json.load(f)
+        dataset = load_dataset(DATASET.WORKING)
     keys = list(dataset.keys())
     image = None
     for _ in range(len(keys)):
@@ -49,16 +46,24 @@ def next_image(dataset=None):
             v["label"] = _pending_
             image = (k, v)
             break
+    # Just to ensure there is no more unlabeled lambs
+    if image is None:
+        for k, v in dataset.items():
+            if v["label"] is None:
+                v["label"] = _pending_
+                image = (k, v)
+                break
     if image is not None:
-        with open(__dataset_conf_file__, "w") as f:
-            f.write(json.dumps(dataset, sort_keys=True, indent=4))
-        return image
+        write_dataset(DATASET.WORKING, dataset)
+        return image, dataset
     else:
         print("we didn't find and image!")
-        raise Exception("Not image found")
+        # raise Exception("Not image found")
+        return None
 
 
-def update_current_photo_user(id_user, next_photo, last_photo_label=None, user_data=None):
+def update_current_photo_user(id_user, next_photo, last_photo_label=None, user_data=None, working_dataset=None,
+                              labeled_dataset=None):
     """
     Upload the current image asigned to a specific user in the dictionary.
     Saves the label of the last imaged which was asigned to that user.
@@ -66,8 +71,7 @@ def update_current_photo_user(id_user, next_photo, last_photo_label=None, user_d
     id_user = str(id_user)
     # Get the dataset of users-photos dictionary
     if user_data is None:
-        with open(__users_data__, "r") as f:
-            user_data = json.load(f)
+        user_data = load_dataset(DATASET.USERS)
     changes = []
 
     if id_user in user_data.keys() and last_photo_label is not None:
@@ -83,54 +87,56 @@ def update_current_photo_user(id_user, next_photo, last_photo_label=None, user_d
     user_data[id_user][1]["label"] = _pending_
     changes.append((next_photo[0], _pending_))
     # Update the dataset of labeled images json file
-    update_image(changes)
+    update_image(changes, working_dataset, labeled_dataset)
 
     # Save the current dataset of users-photos dictionary
-    with open(__users_data__, "w") as f:
-        f.write(json.dumps(user_data, sort_keys=True, indent=4))
+    write_dataset(DATASET.USERS, user_data)
 
 
-def update_last_photo(id_user, last_photo_label=None, user_data=None):
+def update_last_photo(id_user, user_data=None, working_dataset=None, labeled_dataset=None):
     # Get the dataset of users-photos dictionary
     id_user = str(id_user)
     if user_data is None:
-        with open(__users_data__, "r") as f:
-            user_data = json.load(f)
+        user_data = load_dataset(DATASET.USERS)
 
     if id_user in user_data.keys():
-        update_image([(user_data[id_user][0], None)])
+        update_image(changes=[(user_data[id_user][0], None)], working_dataset=working_dataset, labeled_dataset=labeled_dataset)
 
         # Remove the user from the users-photo dictionary
-        try:
-            user_data.pop(id_user, None)
-        except KeyError as e:
-            print("Error trying to delete the user ", id_user)
-            print(e)
-            print(type(e))
+        user_data.pop(id_user, None)
 
         # Save the current dataset of users-photos dictionary
-        with open(__users_data__, "w") as f:
-            f.write(json.dumps(user_data, sort_keys=True, indent=4))
+        write_dataset(DATASET.USERS, user_data)
 
 
-def update_image(changes, dataset=None):
+def update_image(changes, working_dataset=None, labeled_dataset=None):
     """
     It uploads the label of a specific image in the dataset of images
     """
-
-    if dataset is None:
-        with open(__dataset_conf_file__, "r") as f:
-            dataset = json.load(f)
+    if working_dataset is None:
+        working_dataset = load_dataset(DATASET.WORKING)
+    if labeled_dataset is None and changes[0][1] not in (None, _pending_):
+        labeled_dataset = load_dataset(DATASET.LABELED)
 
     for id_photo, value in changes:
-        if dataset[id_photo]["label"] in (None, _pending_):
-            dataset[id_photo]["label"] = value
+        if value in (None, _pending_):
+            if working_dataset[id_photo]["label"] in (None, _pending_):
+                working_dataset[id_photo]["label"] = value
+            else:
+                try:
+                    working_dataset.pop(id_photo, None)
+                except:
+                    pass
         else:
-            raise Exception("Trying to change the label of a labeled image")
+            if working_dataset[id_photo]["label"] in (None, _pending_):
+                image = working_dataset.pop(id_photo, None)
+                if image is not None:
+                    image["label"] = value
+                    labeled_dataset[id_photo] = image
+            else:
+                raise Exception("Trying to change the label of a labeled image")
 
-    with open(__dataset_conf_file__, "w") as f:
-        f.write(json.dumps(dataset, sort_keys=True, indent=4))
-
-
-if __name__ == "__main__":
-    next_image()
+    if working_dataset is not None:
+        write_dataset(DATASET.WORKING, working_dataset)
+    if labeled_dataset is not None:
+        write_dataset(DATASET.LABELED, labeled_dataset)

@@ -1,6 +1,6 @@
 import os
 import json
-from FileManager import parent_folder, __dataset_conf_file__, __users_data__
+from FileManager import parent_folder, write_dataset, DATASET
 
 if __name__ == "__main__":
     # Initialice the dataset with all the files
@@ -20,8 +20,7 @@ if __name__ == "__main__":
 
     # Save the indexation of the dataset in a configuration file
     print(json.dumps(dataset, sort_keys=True, indent=4))
-    with open(__dataset_conf_file__, "w") as f:
-        f.write(json.dumps(dataset, sort_keys=True, indent=4))
-    # Initialice the users_data file
-    with open(__users_data__, "w") as f:
-        f.write(json.dumps({}, sort_keys=True, indent=4))
+    write_dataset(DATASET.ORIGINAL, dataset)
+    write_dataset(DATASET.WORKING, dataset)
+    write_dataset(DATASET.LABELED, {})
+    write_dataset(DATASET.USERS, {})

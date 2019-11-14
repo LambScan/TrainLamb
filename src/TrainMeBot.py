@@ -1,9 +1,9 @@
+import os
 import time
 import telepot
 from telepot.loop import MessageLoop
-from features import upload_info, start, stop, restart, ignore
 from FileManager import parent_folder
-import os
+from features import upload_info, start, stop, restart, ignore
 
 __TOKEN__ = None
 
@@ -30,14 +30,6 @@ def on_chat_message(msg):
         text = msg["text"]
         if text in default_options:
             default_options[text](my_bot, chat_id)
-        # if text == "/start":
-        #     start(my_bot, chat_id)
-        # elif text == "/stop":
-        #     stop(my_bot, chat_id)
-        # elif text == "/restart":
-        #     restart(my_bot, chat_id)
-        # elif "I don't know" in text or "Next one" in text:
-        #     ignore(my_bot, chat_id)
         elif text in options:
             upload_info(my_bot, chat_id, options[text])
         else:
