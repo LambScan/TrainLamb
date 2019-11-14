@@ -2,6 +2,30 @@ import os
 import json
 import random
 
+# example dirty: "2019-11-05 07_30_18.182635_"
+# example fly: "2019-11-06 08_56_10.422600_"
+# example dirty with lamb: "2019-11-06 08_20_50.439476_"
+# example wrong: "2019-11-05 09_32_36.963856_" (2 lambs)
+# example wrong: "2019-11-05 09_32_30.893749_" (2 lambs)
+# example wrong: "2019-11-05 06_56_04.780405_" (just HEAD)
+# example wrong:
+# example wrong:
+# example grown sheep: "2019-11-05 09_31_04.304448_"
+# example grown sheep: "2019-11-05 09_44_39.307563_"
+# example little lamb: "2019-11-05 20_47_00.847771_"
+# example little lamb: "2019-11-05 09_39_13.913446_"
+# example little lamb: "2019-11-05 09_34_47.426885_"
+# example little lamb: "2019-11-05 09_39_02.802726_"
+# example little lamb: "2019-11-05 09_39_52.953345_"
+# example EMPTY: "2019-11-05 07_17_00.769557_"
+# example EMPTY: "2019-11-05 09_15_48.784271_"
+# example EMPTY: "2019-11-05 08_52_20.766967_"
+# example EMPTY: "2019-11-05 06_01_35.794028_"
+#
+#
+
+
+
 parent_folder = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 __dataset_conf_file__ = os.path.join(parent_folder, "dataset", "dataset.json")
 __users_data__ = os.path.join(parent_folder, "dataset", "datausers.json")

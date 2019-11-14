@@ -1,6 +1,6 @@
 etc/config
 
-*.png
+*/savings/*
 
 .vscode/
 
