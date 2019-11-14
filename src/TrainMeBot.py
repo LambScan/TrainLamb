@@ -12,10 +12,10 @@ def __get_token__():
     return str(__TOKEN__)
 
 
-options = {"One complete lamb": "lamb",
-           "Empty": "empty",
-           "Not exactly one complete lamb": "wrong",
-           "Error / Dirty / A fly": "fly"}
+options = {u'\U0001F411'+" One complete lamb "+u'\U0001F411': "lamb",
+           u'U0001F342'+" Empty "+u'U0001F342': "empty",
+           u'U0001F984'+" Not exactly one complete lamb "+u'U0001F984': "wrong",
+           u'U0001F99F'+" Error / Dirty / A fly "+u'U0001F99F' : "fly"}
 
 
 def on_chat_message(msg):
@@ -33,6 +33,9 @@ def on_chat_message(msg):
             ignore(my_bot, chat_id)
         elif text in options:
             upload_info(my_bot, chat_id, options[text])
+        else:
+            my_bot.sendMessage(chat_id=chat_id, text="Only predefined options are supported by this little lamb.")
+
     else:
         my_bot.sendMessage(chat_id=chat_id, text="Non text messages ain't supported by this poor little lamb.")
 

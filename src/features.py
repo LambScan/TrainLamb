@@ -6,8 +6,10 @@ import time
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from FileManager import next_image, update_current_photo_user, update_last_photo, parent_folder, __dataset_conf_file__, __users_data__
 
-custom_keyboard = [["One complete lamb", "Empty"],
-                   ["Not exactly one complete lamb", "Error / Dirty / A fly"],
+custom_keyboard = [[u'\U0001F411'+" One complete lamb "+u'\U0001F411',
+                    u'U0001F342'+" Empty "+u'U0001F342'],
+                   [u'U0001F984'+" Not exactly one complete lamb "+u'U0001F984',
+                    u'U0001F99F'+" Error / Dirty / A fly "+u'U0001F99F'],
                    ["I don't know", "Next one"]]
 reply_markup = ReplyKeyboardMarkup(keyboard=custom_keyboard)
 
@@ -36,6 +38,8 @@ def normal_execution(TelegramBot, user_id, last_photo_label=None):
     # Send the next photo
     temp_path = str(str(datetime.now()) + "_temp.png")
     cv2.imwrite(temp_path, image)
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="What do you see in the following picture?")
     TelegramBot.sendPhoto(chat_id=user_id,
                           photo=open(temp_path, "rb"),
                           reply_markup=reply_markup)
