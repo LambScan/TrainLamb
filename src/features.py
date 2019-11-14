@@ -34,7 +34,7 @@ def normal_execution(TelegramBot, user_id, last_photo_label=None):
     if last_photo_label is None:
         update_current_photo_user(id_user=user_id, next_photo=image_dict)
     else:
-        print("We're changing the label to: ", last_photo_label)
+        print("The user ", user_id, " is changing the label to: ", last_photo_label)
         update_current_photo_user(id_user=user_id, next_photo=image_dict, last_photo_label=last_photo_label)
 
     # Send the next photo
@@ -60,7 +60,46 @@ def send_photo(TelegramBot, user_id, path=None, image=None):
         raise Exception("No arguments for sending the picture!.")
 
 
+def stop(TelegramBot, user_id):
+    # Upload dataset's labels: "pending" to None
+    update_last_photo(id_user=user_id, last_photo_label=None)
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="Bot stopped",
+                            reply_markup=ReplyKeyboardRemove())
+
+
+def restart(TelegramBot, user_id):
+    # The same thing that with the stop function but without sending the stop message
+    update_last_photo(id_user=user_id, last_photo_label=None)
+    start(TelegramBot, user_id)
+
+
+def upload_info(TelegramBot, user_id, label):
+    normal_execution(TelegramBot, user_id, label)
+
+
+def ignore(TelegramBot, user_id):
+    # Query the next to-label image to show
+    image_dict = next_image()
+    # Make a new image by stacking the two images
+    image = get_image(color_path=image_dict[1]["path_color"], depth_path=image_dict[1]["path_depth"])
+
+    # The same thing that with the stop function but without sending the stop message
+    update_last_photo(id_user=user_id, last_photo_label=None)
+
+    # Update the assigned photo to this user and save the last label
+    update_current_photo_user(id_user=user_id, next_photo=image_dict)
+
+    # Send the next photo
+    cv2.imwrite("temp.png", image)
+    current_msg = TelegramBot.sendPhoto(chat_id=user_id,
+                                        photo=open("temp.png", "rb"),
+                                        reply_markup=reply_markup)
+    os.remove("temp.png")
+
+
 def start(TelegramBot, user_id):
+    # There's a tutorial here and that's why all of this code...
     TelegramBot.sendMessage(chat_id=user_id,
                             text="\U0001F411 \U0001F411 \U0001F411 \U0001F411 \U0001F411")
     time.sleep(1)
@@ -134,41 +173,3 @@ def start(TelegramBot, user_id):
 
     time.sleep(3)
     normal_execution(TelegramBot, user_id)
-
-
-def stop(TelegramBot, user_id):
-    # Upload dataset's labels: "pending" to None
-    update_last_photo(id_user=user_id, last_photo_label=None)
-    TelegramBot.sendMessage(chat_id=user_id,
-                            text="Bot stopped",
-                            reply_markup=ReplyKeyboardRemove())
-
-
-def restart(TelegramBot, user_id):
-    # The same thing that with the stop function but without sending the stop message
-    update_last_photo(id_user=user_id, last_photo_label=None)
-    start(TelegramBot, user_id)
-
-
-def upload_info(TelegramBot, user_id, label):
-    normal_execution(TelegramBot, user_id, label)
-
-
-def ignore(TelegramBot, user_id):
-    # Query the next to-label image to show
-    image_dict = next_image()
-    # Make a new image by stacking the two images
-    image = get_image(color_path=image_dict[1]["path_color"], depth_path=image_dict[1]["path_depth"])
-
-    # The same thing that with the stop function but without sending the stop message
-    update_last_photo(id_user=user_id, last_photo_label=None)
-
-    # Update the assigned photo to this user and save the last label
-    update_current_photo_user(id_user=user_id, next_photo=image_dict)
-
-    # Send the next photo
-    cv2.imwrite("temp.png", image)
-    current_msg = TelegramBot.sendPhoto(chat_id=user_id,
-                                        photo=open("temp.png", "rb"),
-                                        reply_markup=reply_markup)
-    os.remove("temp.png")
