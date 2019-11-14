@@ -1,15 +1,12 @@
 import os
-import time
 import json
-from datetime import datetime, date
-import cv2
-
+import random
 
 parent_folder = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-
 __dataset_conf_file__ = os.path.join(parent_folder, "dataset", "dataset.json")
 __users_data__ = os.path.join(parent_folder, "dataset", "datausers.json")
 _pending_ = "pending"
+
 
 def next_image(dataset=None):
     """
@@ -19,14 +16,22 @@ def next_image(dataset=None):
     if dataset is None:
         with open(__dataset_conf_file__, "r") as f:
             dataset = json.load(f)
-    for k, v in dataset.items():
+    keys = list(dataset.keys())
+    image = None
+    for _ in range(len(keys)):
+        k = random.choice(keys)
+        v = dataset[k]
         if v["label"] is None:
             v["label"] = _pending_
             image = (k, v)
             break
-    with open(__dataset_conf_file__, "w") as f:
-        f.write(json.dumps(dataset, sort_keys=True, indent=4))
-    return image
+    if image is not None:
+        with open(__dataset_conf_file__, "w") as f:
+            f.write(json.dumps(dataset, sort_keys=True, indent=4))
+        return image
+    else:
+        print("we didn't find and image!")
+        raise Exception("Not image found")
 
 
 def update_current_photo_user(id_user, next_photo, last_photo_label=None, user_data=None):
@@ -55,7 +60,6 @@ def update_current_photo_user(id_user, next_photo, last_photo_label=None, user_d
     changes.append((next_photo[0], _pending_))
     # Update the dataset of labeled images json file
     update_image(changes)
-
 
     # Save the current dataset of users-photos dictionary
     with open(__users_data__, "w") as f:
