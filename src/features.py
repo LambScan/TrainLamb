@@ -53,8 +53,7 @@ def send_photo(TelegramBot, user_id, path=None, image=None):
         os.remove(temp_path)
     elif path is not None and image is None:
         TelegramBot.sendPhoto(chat_id=user_id,
-                              photo=open(path, "rb"),
-                              reply_markup=reply_markup)
+                              photo=open(path, "rb"))
     else:
         print("No arguments for sending the picture")
         raise Exception("No arguments for sending the picture!.")
@@ -101,7 +100,7 @@ def ignore(TelegramBot, user_id):
 def start(TelegramBot, user_id):
     # There's a tutorial here and that's why all of this code...
     TelegramBot.sendMessage(chat_id=user_id,
-                            text="\U0001F411 \U0001F411 \U0001F411 \U0001F411 \U0001F411")
+                            text="\U0001F411 \U0001F411 \U0001F411 \U0001F411 \U0001F411", reply_markup=ReplyKeyboardRemove())
     time.sleep(1)
     TelegramBot.sendMessage(chat_id=user_id,
                             text="We're trying to sort out a dataset to train a neural network \U0001F9E0 with a bunch of lamb's images.\U0001F411 \nWe only discriminate 4 options:")
