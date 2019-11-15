@@ -3,7 +3,7 @@ import time
 import telepot
 from telepot.loop import MessageLoop
 from FileManager import parent_folder
-from features import upload_info, start, stop, restart, ignore
+from features import upload_info, start, stop, restart, ignore, options, default_options
 
 __TOKEN__ = None
 
@@ -14,13 +14,6 @@ def __get_token__():
     return str(__TOKEN__)
 
 
-options = {"\U0001F411 One complete lamb \U0001F411": "lamb",
-           "\U0001F342 Empty \U0001F342": "empty",
-           "\U0001F984 Not exactly one complete lamb \U0001F984": "wrong",
-           "\U0001F99F Error / Dirty / A fly \U0001F99F": "fly"}
-
-default_options = {"/start": start, "/stop": stop, "/restart": restart, "\U0001F937 I don't know \U0001F937": ignore,
-                   "\U0001F195 Next one \U0001F195": ignore}
 
 
 def on_chat_message(msg):

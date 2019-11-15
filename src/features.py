@@ -8,7 +8,6 @@ from FileManager import next_image, update_current_photo_user, update_last_photo
 
 
 def get_custom_keyboard():
-    from TrainMeBot import options
     _ = list(options.keys())
     custom_keyboard = list(zip(_[::2], _[1::2]))
     custom_keyboard.append(("\U0001F937 I don't know \U0001F937", "\U0001F195 Next one \U0001F195"))
@@ -45,6 +44,9 @@ def normal_execution(TelegramBot, user_id, last_photo_label=None):
                                 text="What do you see in the following picture?")
         send_photo(TelegramBot=TelegramBot, user_id=user_id, image=image)
     else:
+        TelegramBot.sendMessage(chat_id=manager,
+                                text="Labelling task finished",
+                                reply_markup=ReplyKeyboardRemove())
         TelegramBot.sendMessage(chat_id=manager,
                                 text="Labelling task finished",
                                 reply_markup=ReplyKeyboardRemove())
@@ -101,11 +103,15 @@ def ignore(TelegramBot, user_id):
 
         # Send the next photo
         cv2.imwrite("temp.png", image)
-        TelegramBot.sendPhoto(chat_id=user_id,
-                              photo=open("temp.png", "rb"),
-                              reply_markup=get_custom_keyboard())
+        # Send the next photo
+        TelegramBot.sendMessage(chat_id=user_id,
+                                text="What do you see in the following picture?")
+        send_photo(TelegramBot=TelegramBot, user_id=user_id, image=image)
         os.remove("temp.png")
     else:
+        TelegramBot.sendMessage(chat_id=manager,
+                                text="Labelling task finished",
+                                reply_markup=ReplyKeyboardRemove())
         TelegramBot.sendMessage(chat_id=manager,
                                 text="Labelling task finished",
                                 reply_markup=ReplyKeyboardRemove())
@@ -187,3 +193,12 @@ def start(TelegramBot, user_id):
 
     time.sleep(3)
     normal_execution(TelegramBot, user_id)
+
+
+options = {"\U0001F411 One complete lamb \U0001F411": "lamb",
+           "\U0001F342 Empty \U0001F342": "empty",
+           "\U0001F984 Not exactly one complete lamb \U0001F984": "wrong",
+           "\U0001F99F Error / Dirty / A fly \U0001F99F": "fly"}
+
+default_options = {"/start": start, "/stop": stop, "/restart": restart, "\U0001F937 I don't know \U0001F937": ignore,
+                   "\U0001F195 Next one \U0001F195": ignore}
