@@ -30,7 +30,7 @@ def normal_execution(TelegramBot, user_id, last_photo_label=None):
     if _ is not None:
         image_dict, working_dataset = _
         # Make a new image by stacking the two images
-        image = get_image(depth_path=image_dict[1]["path_depth"], color_path=image_dict[1]["path_color"])
+        image = get_image(depth_path=image_dict[1]["path_depth"])
         # Update the assigned photo to this user and save the last label
         if last_photo_label is None:
             update_current_photo_user(id_user=user_id, next_photo=image_dict, working_dataset=working_dataset)
@@ -70,7 +70,7 @@ def send_photo(TelegramBot, user_id, path=None, image=None):
 
 def stop(TelegramBot, user_id):
     # Upload dataset's labels: "pending" to None
-    update_last_photo(id_user=user_id, last_photo_label=None)
+    update_last_photo(id_user=user_id)
     TelegramBot.sendMessage(chat_id=user_id,
                             text="Bot stopped",
                             reply_markup=ReplyKeyboardRemove())
@@ -78,7 +78,7 @@ def stop(TelegramBot, user_id):
 
 def restart(TelegramBot, user_id):
     # The same thing that with the stop function but without sending the stop message
-    update_last_photo(id_user=user_id, last_photo_label=None)
+    update_last_photo(id_user=user_id)
     start(TelegramBot, user_id)
 
 
