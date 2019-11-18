@@ -73,7 +73,6 @@ def update_current_photo_user(id_user, next_photo, last_photo_label=None, user_d
     if user_data is None:
         user_data = load_dataset(DATASET.USERS)
     changes = []
-
     if id_user in user_data.keys() and last_photo_label is not None:
         if user_data[id_user][1]["label"] in (None, _pending_):
             # Collect the pending changes to-do in the image's dataset

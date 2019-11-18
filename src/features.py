@@ -7,10 +7,14 @@ from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from FileManager import next_image, update_current_photo_user, update_last_photo, parent_folder, manager
 
 
+# TODO: /about /help "/"-command, buttons
+
 def get_custom_keyboard():
     _ = list(options.keys())
     custom_keyboard = list(zip(_[::2], _[1::2]))
-    custom_keyboard.append(("\U0001F937 I don't know \U0001F937", "\U0001F195 Next one \U0001F195"))
+    custom_keyboard[-1] = custom_keyboard[-1] + ("\U0001F937 I don't know",)
+    custom_keyboard[0] = custom_keyboard[0] + ("\U0001F914 Help",)
+    # custom_keyboard.append(("\U0001F937 I don't know \U0001F937", "\U0001F195 Next one \U0001F195"))
     return ReplyKeyboardMarkup(keyboard=custom_keyboard)
 
 
@@ -38,7 +42,9 @@ def normal_execution(TelegramBot, user_id, last_photo_label=None):
             print("The user ", user_id, " is changing the label to: ", last_photo_label)
             update_current_photo_user(id_user=user_id, next_photo=image_dict, last_photo_label=last_photo_label,
                                       working_dataset=working_dataset)
-
+            TelegramBot.sendMessage(chat_id=user_id,
+                                    text="You're changing the image's label to: " + str(last_photo_label))
+            time.sleep(1.3)
         # Send the next photo
         TelegramBot.sendMessage(chat_id=user_id,
                                 text="What do you see in the following picture?")
@@ -48,7 +54,7 @@ def normal_execution(TelegramBot, user_id, last_photo_label=None):
                                 text="Labelling task finished",
                                 reply_markup=ReplyKeyboardRemove())
         TelegramBot.sendMessage(chat_id=manager,
-                                text="Labelling task finished",
+                                text="I repeat, the labelling task has finished",
                                 reply_markup=ReplyKeyboardRemove())
 
 
@@ -71,6 +77,8 @@ def send_photo(TelegramBot, user_id, path=None, image=None):
 def stop(TelegramBot, user_id):
     # Upload dataset's labels: "pending" to None
     update_last_photo(id_user=user_id)
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="\U0001F603 Thank you for your time feeding our system \U0001F44F \nYou're improving a still harmless AI... \U0001F608")
     TelegramBot.sendMessage(chat_id=user_id,
                             text="Bot stopped",
                             reply_markup=ReplyKeyboardRemove())
@@ -130,7 +138,7 @@ def start(TelegramBot, user_id):
                             text=" \U0001F4BB These are the 4 options availables: \U0001F913")
     time.sleep(2)
     TelegramBot.sendMessage(chat_id=user_id,
-                            text="1. \U0001F411 A pretty little lamb. \U0001F411 \nThe image must contain the full animal, end to end; the head and the tail.")
+                            text="1. \U0001F411 A whole lamb. \U0001F411 \nThe image must contain the full animal, end to end; the head and the tail.")
     time.sleep(1)
     TelegramBot.sendMessage(chat_id=user_id,
                             text="A few examples:")
@@ -176,7 +184,7 @@ def start(TelegramBot, user_id):
                path=os.path.join(parent_folder, *"/dataset/examples/dirty_2lambs.png".split("/")))
     time.sleep(1)
     TelegramBot.sendMessage(chat_id=user_id,
-                            text="4. ...a fly.   \U0001F99F \nYes.\n \U0001F997 There are a lot of flys \U0001F4A9 in the farm; they use our cameras to everything they can possibly imagine \U0001F4A9. We're still working on it.\n \U0001F577 If you get an image which you can't interpretate \U0001F47B or just partially interpretate, please, \U0001F578 label it as a dirty image,\U0001F4A9 an error, a fly. \U0001F99F")
+                            text="4. ...a fly.   \U0001F99F \nYes.\n \U0001F997 There are a lot of flies \U0001F4A9 in the farm; they use our cameras to everything they can possibly imagine \U0001F4A9. We're still working on it.\n \U0001F577 If you get an image that you can't interpretate \U0001F47B or just partially interpretate, please, \U0001F578 label it as a dirty image,\U0001F4A9 an error, a fly. \U0001F99F")
     time.sleep(1)
     TelegramBot.sendMessage(chat_id=user_id,
                             text="A few examples:")
@@ -195,10 +203,15 @@ def start(TelegramBot, user_id):
     normal_execution(TelegramBot, user_id)
 
 
-options = {"\U0001F411 One complete lamb \U0001F411": "lamb",
-           "\U0001F342 Empty \U0001F342": "empty",
-           "\U0001F984 Not exactly one complete lamb \U0001F984": "wrong",
-           "\U0001F99F Error / Dirty / A fly \U0001F99F": "fly"}
+def send_help(TelegramBot, user_id):
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="There is still no help option available")
 
-default_options = {"/start": start, "/stop": stop, "/restart": restart, "\U0001F937 I don't know \U0001F937": ignore,
-                   "\U0001F195 Next one \U0001F195": ignore}
+
+options = {"\U0001F411 A whole lamb": "lamb",
+           "\U0001F342 Empty": "empty",
+           "\U0001F984 Wrong position": "wrong",
+           "\U0001F99F Error / flies": "fly"}
+
+default_options = {"/start": start, "/stop": stop, "/restart": restart, "\U0001F937 I don't know": ignore,
+                   "\U0001F914 Help": send_help}
