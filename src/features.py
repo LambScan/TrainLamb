@@ -4,10 +4,9 @@ import time
 from datetime import datetime
 import numpy as np
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
-from FileManager import next_image, update_current_photo_user, update_last_photo, parent_folder, manager
+from FileManager import next_image, update_current_photo_user, update_last_photo, parent_folder, manager, get_info, \
+    get_current_image
 
-
-# TODO: /about /help "/"-command, buttons
 
 def get_custom_keyboard():
     _ = list(options.keys())
@@ -43,7 +42,7 @@ def normal_execution(TelegramBot, user_id, last_photo_label=None):
             update_current_photo_user(id_user=user_id, next_photo=image_dict, last_photo_label=last_photo_label,
                                       working_dataset=working_dataset)
             TelegramBot.sendMessage(chat_id=user_id,
-                                    text="You're changing the image's label to: " + str(last_photo_label))
+                                    text="Thanks. You're changing the image's label to: " + str(last_photo_label))
             time.sleep(1.3)
         # Send the next photo
         TelegramBot.sendMessage(chat_id=user_id,
@@ -75,10 +74,16 @@ def send_photo(TelegramBot, user_id, path=None, image=None):
 
 
 def stop(TelegramBot, user_id):
+    final_message, personal_msg = get_info(user_id)
+
     # Upload dataset's labels: "pending" to None
     update_last_photo(id_user=user_id)
     TelegramBot.sendMessage(chat_id=user_id,
                             text="\U0001F603 Thank you for your time feeding our system \U0001F44F \nYou're improving a still harmless AI... \U0001F608")
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text=personal_msg)
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text=final_message)
     TelegramBot.sendMessage(chat_id=user_id,
                             text="Bot stopped",
                             reply_markup=ReplyKeyboardRemove())
@@ -126,6 +131,28 @@ def ignore(TelegramBot, user_id):
 
 
 def start(TelegramBot, user_id):
+    tutorial(TelegramBot, user_id)
+    normal_execution(TelegramBot, user_id)
+
+
+def send_help(TelegramBot, user_id):
+    final_message, personal_msg = get_info(user_id)
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text=personal_msg)
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text=final_message)
+    resend_last_image(TelegramBot, user_id)
+
+
+def resend_last_image(TelegramBot, user_id):
+    image = get_current_image(user_id)
+    image = get_image(depth_path=image[1]["path_depth"])
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="What do you see in the following picture?")
+    send_photo(TelegramBot, user_id, image=image)
+
+
+def tutorial(TelegramBot, user_id):
     # There's a tutorial here and that's why all of this code...
     TelegramBot.sendMessage(chat_id=user_id,
                             text="\U0001F411 \U0001F411 \U0001F411 \U0001F411 \U0001F411",
@@ -200,12 +227,6 @@ def start(TelegramBot, user_id):
                             text="\U0001F411 \U0001F411 \U0001F411 \U0001F411 \U0001F411")
 
     time.sleep(3)
-    normal_execution(TelegramBot, user_id)
-
-
-def send_help(TelegramBot, user_id):
-    TelegramBot.sendMessage(chat_id=user_id,
-                            text="There is still no help option available")
 
 
 options = {"\U0001F411 A whole lamb": "lamb",

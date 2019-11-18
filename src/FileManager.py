@@ -30,6 +30,27 @@ def write_dataset(which_dataset, dataset):
         f.write(json.dumps(dataset, sort_keys=True, indent=4))
 
 
+def get_info(user_id):
+    user_id = str(user_id)
+    datauser = load_dataset(DATASET.USERS)
+    working = load_dataset(DATASET.WORKING)
+    labeled = load_dataset(DATASET.LABELED)
+    original = load_dataset(DATASET.ORIGINAL)
+
+    final_message = "There are " + str(len(original)) + " total images\n" + str(
+        len(labeled)) + " already labeled images and " + \
+                    str(len(working)) + " images to sort out yet.\n" + "There are also " + \
+                    str(len(datauser)) + " people using this bot."
+    personal_msg = "You already sorted out " + str(datauser[user_id]["counter"]) + " lamb's images!"
+    return final_message, personal_msg
+
+
+def get_current_image(user_id):
+    user_id = str(user_id)
+    userdata = load_dataset(DATASET.USERS)
+    return userdata[user_id]["image"]
+
+
 def next_image(dataset=None):
     """
     Get the next unlabeled image from the dataset of labeled images
@@ -69,21 +90,26 @@ def update_current_photo_user(id_user, next_photo, last_photo_label=None, user_d
     Saves the label of the last imaged which was asigned to that user.
     """
     id_user = str(id_user)
+    counter = 0
     # Get the dataset of users-photos dictionary
     if user_data is None:
         user_data = load_dataset(DATASET.USERS)
     changes = []
     if id_user in user_data.keys() and last_photo_label is not None:
-        if user_data[id_user][1]["label"] in (None, _pending_):
+        if user_data[id_user]["image"][1]["label"] in (None, _pending_):
             # Collect the pending changes to-do in the image's dataset
-            changes.append((user_data[id_user][0], last_photo_label))
+            changes.append((user_data[id_user]["image"][0], last_photo_label))
+            counter += 1
         else:
             print("User ", id_user, " is trying to change the photo ",
                   user_data[id_user], " with no info")
+        counter = int(user_data[id_user].get("counter", 0))
+        counter += 1
     # Prepare next photo in the dataset of users-photos dictionary
     #   and discard the last image asigned to the user if it was the case
-    user_data[id_user] = next_photo
-    user_data[id_user][1]["label"] = _pending_
+    user_data[id_user] = {"image": next_photo}
+    user_data[id_user]["image"][1]["label"] = _pending_
+    user_data[id_user]["counter"] = counter
     changes.append((next_photo[0], _pending_))
     # Update the dataset of labeled images json file
     update_image(changes, working_dataset, labeled_dataset)
@@ -99,7 +125,8 @@ def update_last_photo(id_user, user_data=None, working_dataset=None, labeled_dat
         user_data = load_dataset(DATASET.USERS)
 
     if id_user in user_data.keys():
-        update_image(changes=[(user_data[id_user][0], None)], working_dataset=working_dataset, labeled_dataset=labeled_dataset)
+        update_image(changes=[(user_data[id_user][0], None)], working_dataset=working_dataset,
+                     labeled_dataset=labeled_dataset)
 
         # Remove the user from the users-photo dictionary
         user_data.pop(id_user, None)
