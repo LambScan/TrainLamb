@@ -125,7 +125,7 @@ def update_last_photo(id_user, user_data=None, working_dataset=None, labeled_dat
         user_data = load_dataset(DATASET.USERS)
 
     if id_user in user_data.keys():
-        update_image(changes=[(user_data[id_user][0], None)], working_dataset=working_dataset,
+        update_image(changes=[(user_data[id_user]["image"][0], None)], working_dataset=working_dataset,
                      labeled_dataset=labeled_dataset)
 
         # Remove the user from the users-photo dictionary

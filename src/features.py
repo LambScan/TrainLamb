@@ -104,6 +104,9 @@ def ignore(TelegramBot, user_id):
     _ = next_image()
     if _ is not None:
         image_dict, working_dataset = _
+        
+        TelegramBot.sendMessage(chat_id=manager,
+                                text="Ok, let's move on")
 
         # Make a new image by stacking the two images
         image = get_image(color_path=image_dict[1]["path_color"], depth_path=image_dict[1]["path_depth"])
