@@ -5,7 +5,7 @@ from datetime import datetime
 import numpy as np
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from FileManager import next_image, update_current_photo_user, update_last_photo, parent_folder, manager, get_info, \
-    get_current_image
+    get_current_image, get_ranking
 
 
 def get_custom_keyboard():
@@ -32,8 +32,9 @@ def normal_execution(TelegramBot, user_id, last_photo_label=None):
     _ = next_image()
     if _ is not None:
         image_dict, working_dataset = _
-        # Make a new image by stacking the two images
+        # Load the new depth image and apply a colormap
         image = get_image(depth_path=image_dict[1]["path_depth"])
+
         # Update the assigned photo to this user and save the last label
         if last_photo_label is None:
             update_current_photo_user(id_user=user_id, next_photo=image_dict, working_dataset=working_dataset)
@@ -108,8 +109,8 @@ def ignore(TelegramBot, user_id):
         TelegramBot.sendMessage(chat_id=manager,
                                 text="Ok, let's move on")
 
-        # Make a new image by stacking the two images
-        image = get_image(color_path=image_dict[1]["path_color"], depth_path=image_dict[1]["path_depth"])
+        # Load the new depth image and apply a colormap
+        image = get_image(depth_path=image_dict[1]["path_depth"])
 
         # The same thing that with the stop function but without sending the stop message
         update_last_photo(id_user=user_id)
@@ -144,6 +145,20 @@ def send_help(TelegramBot, user_id):
                             text=personal_msg)
     TelegramBot.sendMessage(chat_id=user_id,
                             text=final_message)
+    resend_last_image(TelegramBot, user_id)
+
+
+def send_stats(TelegramBot, user_id):
+    ranking = get_ranking()
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text="\U0001F3C6 Current ranking: \U0001F3C6")
+    time.sleep(0.5)
+    message = ""
+    for index, player in enumerate(ranking, start=1):
+        message = message + "\U0001F3C7\t{index} º. \t Player {player[0]} with {player[1]} labeled images\n".format(index=index, player=player)
+    TelegramBot.sendMessage(chat_id=user_id,
+                            text=message)
+    time.sleep(2)
     resend_last_image(TelegramBot, user_id)
 
 
@@ -238,4 +253,4 @@ options = {"\U0001F411 A whole lamb": "lamb",
            "\U0001F99F Error / flies": "fly"}
 
 default_options = {"/start": start, "/stop": stop, "/restart": restart, "\U0001F937 I don't know": ignore,
-                   "\U0001F914 Help": send_help}
+                   "\U0001F914 Help": send_help, "/help": send_help, "/stats": send_stats}

@@ -13,10 +13,8 @@ if __name__ == "__main__":
                 root = root.replace(str(parent_folder), "")
 
                 if "depth" in root:
-                    dataset[str(f[0:-15])
-                    ]["path_depth"] = str(os.path.join(root, f))
-                    dataset[str(f[0:-15])
-                    ]["path_color"] = str(os.path.join(root, f)).replace("depth", "color")
+                    dataset[str(f[0:-15])]["path_depth"] = str(os.path.join(root, f))
+                    dataset[str(f[0:-15])]["path_color"] = str(os.path.join(root, f)).replace("depth", "color")
 
     # Save the indexation of the dataset in a configuration file
     print(json.dumps(dataset, sort_keys=True, indent=4))
