@@ -16,13 +16,13 @@ def __get_token__():
 
 def on_chat_message(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
-    # user = (chat_id, msg["from"]["first_name"], msg["from"]["username"])
+    user = (str(chat_id), msg["from"]["first_name"], msg["from"]["username"])
     if content_type == "text":
         text = msg["text"]
         if text in default_options:
-            default_options[text](my_bot, chat_id)
+            default_options[text](my_bot, user)
         elif text in options:
-            upload_info(my_bot, chat_id, options[text])
+            upload_info(my_bot, user, options[text])
         else:
             print("A message with no label came. We should be sending a prefedined message...")
             my_bot.sendMessage(chat_id=chat_id, text="Only predefined options are supported by this little lamb.")

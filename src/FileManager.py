@@ -72,7 +72,8 @@ def get_ranking():
         username = v.get("username", k)
         name = v.get("name", k)
         if username == k:
-            ranking.append(("id: {}".format(k), int(v["counter"])))
+            name = "**" + k[1:-1] + "**"
+            ranking.append(("id: {}".format(name), int(v["counter"])))
         else:
             ranking.append(("{} (@{})".format(name, username), int(v["counter"])))
 
@@ -82,7 +83,13 @@ def get_ranking():
 def get_current_image(user_id):
     user_id = str(user_id)
     userdata = load_dataset(DATASET.USERS)
-    return userdata[user_id]["image"]
+    image = userdata.get(user_id, None)
+    if image is not None:
+        image = image.get("image", None)
+    if image is not None:
+        return image
+    else:
+        return None
 
 
 def next_image(dataset=None):
@@ -117,33 +124,34 @@ def next_image(dataset=None):
         return None
 
 
-def update_current_photo_user(id_user, next_photo, last_photo_label=None, user_data=None, working_dataset=None,
+def update_current_photo_user(user, next_photo, last_photo_label=None, user_data=None, working_dataset=None,
                               labeled_dataset=None):
     """
     Upload the current image asigned to a specific user in the dictionary.
     Saves the label of the last imaged which was asigned to that user.
     """
-    id_user = str(id_user)
+    user_id = str(user[0])
     counter = 0
     # Get the dataset of users-photos dictionary
     if user_data is None:
         user_data = load_dataset(DATASET.USERS)
     changes = []
-    if id_user in user_data.keys() and last_photo_label is not None:
-        if user_data[id_user]["image"][1]["label"] in (None, _pending_):
-            # Collect the pending changes to-do in the image's dataset
-            changes.append((user_data[id_user]["image"][0], last_photo_label))
-            counter += 1
-        else:
-            print("User ", id_user, " is trying to change the photo ",
-                  user_data[id_user], " with no info")
-        counter = int(user_data[id_user].get("counter", 0))
-        counter += 1
+
+    if user_id in user_data.keys():
+        counter = int(user_data[user_id].get("counter", 0))
+        if last_photo_label is not None:
+            if user_data[user_id]["image"][1]["label"] in (None, _pending_):
+                # Collect the pending changes to-do in the image's dataset
+                changes.append((user_data[user_id]["image"][0], last_photo_label))
+                counter += 1
+            else:
+                print("User ", user_id, " is trying to change the photo ",
+                      user_data[user_id], " with no info")
+
     # Prepare next photo in the dataset of users-photos dictionary
     #   and discard the last image asigned to the user if it was the case
-    user_data[id_user] = {"image": next_photo}
-    user_data[id_user]["image"][1]["label"] = _pending_
-    user_data[id_user]["counter"] = counter
+    user_data[user_id] = {"image": next_photo, "name": user[1], "username": user[2], "counter": counter}
+    user_data[user_id]["image"][1]["label"] = _pending_
     changes.append((next_photo[0], _pending_))
     # Update the dataset of labeled images json file
     update_image(changes, working_dataset, labeled_dataset)
@@ -152,19 +160,19 @@ def update_current_photo_user(id_user, next_photo, last_photo_label=None, user_d
     write_dataset(DATASET.USERS, user_data)
 
 
-def update_last_photo(id_user, user_data=None, working_dataset=None, labeled_dataset=None):
+def update_last_photo(user, user_data=None, working_dataset=None, labeled_dataset=None):
     # Get the dataset of users-photos dictionary
-    id_user = str(id_user)
+    user_id = str(user[0])
     if user_data is None:
         user_data = load_dataset(DATASET.USERS)
 
-    if id_user in user_data.keys():
-        update_image(changes=[(user_data[id_user]["image"][0], None)], working_dataset=working_dataset,
+    if user_id in user_data.keys():
+        update_image(changes=[(user_data[user_id]["image"][0], None)], working_dataset=working_dataset,
                      labeled_dataset=labeled_dataset)
 
-        user_data[id_user]["image"][1]["label"] = None
+        user_data[user_id]["image"][1]["label"] = None
         # Remove the user from the users-photo dictionary
-        # user_data.pop(id_user, None)
+        # user_data.pop(user_id, None)
 
         # Save the current dataset of users-photos dictionary
         write_dataset(DATASET.USERS, user_data)
