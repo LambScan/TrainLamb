@@ -16,3 +16,5 @@ src/__pycache__/
 coloured_depth/
 
 coloured_old/
+
+*.json
