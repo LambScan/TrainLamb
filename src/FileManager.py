@@ -5,8 +5,10 @@ from enum import Enum
 
 parent_folder = os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
+manager = []
 with open(os.path.join(parent_folder, "etc", "manager")) as f:
-    manager = int(f.readline().replace("\n", ""))
+    for id in f:
+        manager.append(int(id.replace("\n", "")))
 
 _pending_ = "pending"
 

@@ -50,11 +50,12 @@ def normal_execution(TelegramBot, user, last_photo_label=None):
                                 text="What do you see in the following picture?")
         send_photo(TelegramBot=TelegramBot, user=user, image=image)
     else:
-        TelegramBot.sendMessage(chat_id=manager,
-                                text="Labelling task finished")
-        TelegramBot.sendMessage(chat_id=manager,
-                                text="I repeat, the labelling task has finished",
-                                reply_markup=ReplyKeyboardRemove())
+        for user in manager:
+            TelegramBot.sendMessage(chat_id=manager,
+                                    text="Labelling task finished")
+            TelegramBot.sendMessage(chat_id=manager,
+                                    text="I repeat, the labelling task has finished",
+                                    reply_markup=ReplyKeyboardRemove())
 
 
 def send_photo(TelegramBot, user, path=None, image=None):
@@ -125,11 +126,12 @@ def ignore(TelegramBot, user):
         send_photo(TelegramBot=TelegramBot, user=user, image=image)
         os.remove("temp.png")
     else:
-        TelegramBot.sendMessage(chat_id=manager,
-                                text="Labelling task finished")
-        TelegramBot.sendMessage(chat_id=manager,
-                                text="Labelling task finished",
-                                reply_markup=ReplyKeyboardRemove())
+        for user in manager:
+            TelegramBot.sendMessage(chat_id=manager,
+                                    text="Labelling task finished")
+            TelegramBot.sendMessage(chat_id=manager,
+                                    text="Labelling task finished",
+                                    reply_markup=ReplyKeyboardRemove())
 
 
 def start(TelegramBot, user):
