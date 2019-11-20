@@ -51,11 +51,10 @@ def normal_execution(TelegramBot, user, last_photo_label=None):
         send_photo(TelegramBot=TelegramBot, user=user, image=image)
     else:
         for user in manager:
-            TelegramBot.sendMessage(chat_id=manager,
+            TelegramBot.sendMessage(chat_id=user,
                                     text="Labelling task finished")
-            TelegramBot.sendMessage(chat_id=manager,
-                                    text="I repeat, the labelling task has finished",
-                                    reply_markup=ReplyKeyboardRemove())
+            TelegramBot.sendMessage(chat_id=user,
+                                    text="I repeat, the labelling task has finished")
 
 
 def send_photo(TelegramBot, user, path=None, image=None):
@@ -127,11 +126,10 @@ def ignore(TelegramBot, user):
         os.remove("temp.png")
     else:
         for user in manager:
-            TelegramBot.sendMessage(chat_id=manager,
+            TelegramBot.sendMessage(chat_id=user,
                                     text="Labelling task finished")
-            TelegramBot.sendMessage(chat_id=manager,
-                                    text="Labelling task finished",
-                                    reply_markup=ReplyKeyboardRemove())
+            TelegramBot.sendMessage(chat_id=user,
+                                    text="I repeat, the labelling task has finished")
 
 
 def start(TelegramBot, user):
