@@ -16,7 +16,7 @@ def __get_token__():
 
 def on_chat_message(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
-    user = (str(chat_id), msg["from"]["first_name"], msg["from"]["username"])
+    user = (str(chat_id), msg["from"].get("first_name", str(chat_id)), msg["from"].get("username", str(chat_id)))
     if content_type == "text":
         text = msg["text"]
         if text in default_options:
