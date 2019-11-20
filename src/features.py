@@ -105,7 +105,7 @@ def ignore(TelegramBot, user):
     if _ is not None:
         image_dict, working_dataset = _
 
-        TelegramBot.sendMessage(chat_id=manager,
+        TelegramBot.sendMessage(chat_id=int(user[0]),
                                 text="Ok, let's move on")
 
         # Load the new depth image and apply a colormap
