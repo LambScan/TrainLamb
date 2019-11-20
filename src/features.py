@@ -39,7 +39,7 @@ def normal_execution(TelegramBot, user, last_photo_label=None):
         if last_photo_label is None:
             update_current_photo_user(user=user, next_photo=image_dict, working_dataset=working_dataset)
         else:
-            print("The user ", user[0], " is changing the label to: ", last_photo_label)
+            print("The user ", user[1], " (id: ", user[0], " is changing the label to: ", last_photo_label)
             update_current_photo_user(user=user, next_photo=image_dict, last_photo_label=last_photo_label,
                                       working_dataset=working_dataset)
             TelegramBot.sendMessage(chat_id=int(user[0]),
